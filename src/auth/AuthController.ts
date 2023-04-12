@@ -29,8 +29,15 @@ export default class AuthController implements IController {
             });
         }
 
-        const token = this.service.generateToken(login);
         const user = await new UserService().getByLogin(login);
+
+        if(!user) {
+            return response.status(401).send({
+                error: "Wystąpił nieoczekiwany błąd podczas logowania - użytkownik nie istnieje",
+            });
+        }
+
+        const token = this.service.generateToken(user.id);
 
         if (!user) {
             return response.status(401).send({

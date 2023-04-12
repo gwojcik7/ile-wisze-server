@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import verifyToken from "../auth/TokenMiddleware";
+import {verifyToken} from "../auth/TokenMiddleware";
 import IController from "../core/IController";
 import CreateUserDTO from "./DTO/CreateUserDTO";
 import UserService from "./UserService";

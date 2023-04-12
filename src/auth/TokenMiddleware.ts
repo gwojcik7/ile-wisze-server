@@ -1,17 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-export default function verifyToken(
+
+
+export function verifyToken(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
-    const bearerHeader = req.headers["authorization"];
+    const bearerToken = getTokenFromRequest(req);
 
-    if (!bearerHeader) {
-        return res.status(401).json({ message: "No token provided" });
+    if (!bearerToken) {
+        return res.status(401).json({ message: "Missing token" });
     }
-
-    const bearerToken = bearerHeader.split(" ")[1];
 
     try {
         const secret = process.env.JWT_SECRET;
@@ -26,4 +26,36 @@ export default function verifyToken(
     } catch (error) {
         return res.status(401).json({ message: "Invalid token" });
     }
+}
+
+export function getTokenFromRequest(req: Request) {
+    const bearerHeader = req.headers["authorization"];
+
+    if (!bearerHeader) {
+        return false;
+    }
+
+    return bearerHeader.split(" ")[1];
+}
+
+export function getUserId(req: Request): number | false {   
+    const token = getTokenFromRequest(req);
+    
+    if (!token) {
+        return false;
+    }
+
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+        return false;
+    }
+
+    const decoded = jwt.verify(token, secret);
+    
+    if (!decoded) {
+        return false;
+    }
+
+    return Number(decoded);
 }

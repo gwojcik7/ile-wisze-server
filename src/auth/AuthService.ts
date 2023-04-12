@@ -29,14 +29,14 @@ export default class AuthService implements IService {
         return true;
     };
 
-    public generateToken = (userId: string): string | false => {
+    public generateToken = (userId: number): string | false => {
         const secret = process.env.JWT_SECRET;
 
         if (!secret) {
             return false;
         }
 
-        return jwt.sign(userId, secret);
+        return jwt.sign(userId.toString(), secret);
     };
 
     public isValidToken(token: string): boolean {
