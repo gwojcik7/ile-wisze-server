@@ -1,3 +1,8 @@
 export default class CreateUserDTO {
-    constructor(public login: string, public password: string) {}
+    constructor(
+        public firstName: string,
+        public lastName: string,
+        public login: string, 
+        public password: string
+    ) {}
 }

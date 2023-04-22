@@ -37,6 +37,8 @@ export default class UserController implements IController {
 
     public add = async (req: Request, res: Response) => {
         const createUserDTO = new CreateUserDTO(
+            req.body.firstName,
+            req.body.lastName,
             req.body.login,
             req.body.password
         );

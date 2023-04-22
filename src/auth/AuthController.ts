@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import IController from "../core/IController";
 import UserService from "../user/UserService";
 import AuthService from "./AuthService";
+import { getUserId } from "./TokenMiddleware";
 
 export default class AuthController implements IController {
     public path = "/auth";
@@ -68,10 +69,27 @@ export default class AuthController implements IController {
                     error: "Nieprawidłowy token",
                 });
             }
+            const userId = getUserId(request);
+
+            if (!userId) {
+                return response.status(401).send({
+                    error: "Nieprawidłowy użytkownik",
+                });
+            }
+                    
+            const user = await new UserService().getById(userId);
+
+            if (!user) {
+                return response.status(401).send({
+                    error: "Nieprawidłowy obiekt użytkownika",
+                });
+            }
 
             return response.status(200).send({
-                message: "Token jest prawidłowy",
+                user,
+                token,
             });
+            
         } catch (error) {
             return response.status(401).send({
                 error: "Nieprawidłowy token",

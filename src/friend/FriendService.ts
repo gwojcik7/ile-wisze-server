@@ -9,34 +9,7 @@ import { FriendStatus } from "./FriendStatus";
 
 export default class FriendService implements IService {
 
-    public getInvitations = async (userId: number): Promise<User[]> => {
-        const invitations = await useDb()
-            .getRepository(Friend)
-            .createQueryBuilder("friend")
-            .where("friend.friendId = :userId AND friend.status = :status")
-            .setParameters({
-                userId,
-                status: FriendStatus.PENDING,
-            })
-            .getMany();
-        
-        // Get user data for each invitation
-        const users: User[] = [];
-
-        for (const invitation of invitations) {
-            const user = await useDb()
-                .getRepository(User)
-                .findOneBy({ id: invitation.userId });
-            
-            if (user) {
-                users.push(user);
-            }
-        }
-
-        return users;
-    }
-
-    public getPending = async (userId: number): Promise<User[]> => {
+    public getSentInvitations = async (userId: number): Promise<User[]> => {
         
         const pending = await useDb()
             .getRepository(Friend)
@@ -63,6 +36,34 @@ export default class FriendService implements IService {
 
         return users;
     }
+
+    public getWaitingInvitations = async (userId: number): Promise<User[]> => {
+        const invitations = await useDb()
+            .getRepository(Friend)
+            .createQueryBuilder("friend")
+            .where("friend.friendId = :userId AND friend.status = :status")
+            .setParameters({
+                userId,
+                status: FriendStatus.PENDING,
+            })
+            .getMany();
+        
+        // Get user data for each invitation
+        const users: User[] = [];
+
+        for (const invitation of invitations) {
+            const user = await useDb()
+                .getRepository(User)
+                .findOneBy({ id: invitation.userId });
+            
+            if (user) {
+                users.push(user);
+            }
+        }
+
+        return users;
+    }
+
 
     public getFriends = async (userId: number): Promise<User[]> => {
         const friends = await useDb()

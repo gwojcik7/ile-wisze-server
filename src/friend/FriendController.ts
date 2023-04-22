@@ -20,8 +20,8 @@ export default class FriendController implements IController {
         this.router.post(this.path, verifyToken, this.add);
         this.router.post(this.path + "/accept", verifyToken, this.accept);
         this.router.post(this.path + "/reject", verifyToken, this.reject);
-        this.router.get(this.path + "/invitations", verifyToken, this.getInvitations);
-        this.router.get(this.path + "/pending", verifyToken, this.getPending);
+        this.router.get(this.path + "/sentInvitations", verifyToken, this.getSentInvitations);
+        this.router.get(this.path + "/waitingInvitations", verifyToken, this.getWaitingInvitations);
     };
 
     public add = async (req: Request, res: Response) => {
@@ -101,19 +101,6 @@ export default class FriendController implements IController {
         }
     };
 
-    public getInvitations = async (req: Request, res: Response) => {
-        const userId = req.body.userId;
-
-        try {
-            const invitations = await this.service.getInvitations(userId);
-            res.status(200).send(invitations);
-        } catch (error: any) {
-            res.status(409).send({
-                message: error.message,
-            });
-        }
-    };
-
     public getFriends = async (req: Request, res: Response) => {
         const userId = req.body.userId;
 
@@ -127,7 +114,7 @@ export default class FriendController implements IController {
         }
     };
 
-    public getPending = async (req: Request, res: Response) => {
+    public getSentInvitations = async (req: Request, res: Response) => {
         const userId = getUserId(req);
 
         if(!userId) {
@@ -139,12 +126,33 @@ export default class FriendController implements IController {
         }
 
         try {
-            const pending = await this.service.getPending(userId);
-            res.status(200).send(pending);
+            const sentInvitations = await this.service.getSentInvitations(userId);
+            res.status(200).send(sentInvitations);
         } catch (error: any) {
             res.status(409).send({
                 message: error.message,
             });
         }
     };
+
+    public getWaitingInvitations = async (req: Request, res: Response) => {
+        const userId = getUserId(req);
+
+        if(!userId) {
+            res.status(401).send({
+                message: "Unauthorized",
+                userId: userId
+            });
+            return false;
+        }
+
+        try {
+            const waitingInvitations = await this.service.getWaitingInvitations(userId);
+            res.status(200).send(waitingInvitations);
+        } catch (error: any) {
+            res.status(409).send({
+                message: error.message,
+            });
+        }
+    }
 }

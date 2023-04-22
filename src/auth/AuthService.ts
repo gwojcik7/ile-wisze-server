@@ -35,6 +35,8 @@ export default class AuthService implements IService {
         if (!secret) {
             return false;
         }
+        console.log("secret", userId);
+        
 
         return jwt.sign(userId.toString(), secret);
     };
