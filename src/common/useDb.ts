@@ -3,6 +3,7 @@ import { DataSource } from "typeorm";
 import { User } from "../user/User";
 import dotenv from "dotenv";
 import { Friend } from "../friend/Friend";
+import { Bill } from "../bill/Bill";
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ const dataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: [User, Friend],
+    entities: [User, Friend, Bill],
     subscribers: [],
     migrations: [],
 });

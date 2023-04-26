@@ -8,9 +8,7 @@ import { Friend } from "./Friend";
 import { FriendStatus } from "./FriendStatus";
 
 export default class FriendService implements IService {
-
     public getSentInvitations = async (userId: number): Promise<User[]> => {
-        
         const pending = await useDb()
             .getRepository(Friend)
             .createQueryBuilder("friend")
@@ -20,7 +18,7 @@ export default class FriendService implements IService {
                 status: FriendStatus.PENDING,
             })
             .getMany();
-        
+
         // Get user data for each pending
         const users: User[] = [];
 
@@ -28,14 +26,14 @@ export default class FriendService implements IService {
             const user = await useDb()
                 .getRepository(User)
                 .findOneBy({ id: pendingFriend.friendId });
-                
+
             if (user) {
                 users.push(user);
             }
         }
 
         return users;
-    }
+    };
 
     public getWaitingInvitations = async (userId: number): Promise<User[]> => {
         const invitations = await useDb()
@@ -47,7 +45,7 @@ export default class FriendService implements IService {
                 status: FriendStatus.PENDING,
             })
             .getMany();
-        
+
         // Get user data for each invitation
         const users: User[] = [];
 
@@ -55,15 +53,14 @@ export default class FriendService implements IService {
             const user = await useDb()
                 .getRepository(User)
                 .findOneBy({ id: invitation.userId });
-            
+
             if (user) {
                 users.push(user);
             }
         }
 
         return users;
-    }
-
+    };
 
     public getFriends = async (userId: number): Promise<User[]> => {
         const friends = await useDb()
@@ -81,26 +78,27 @@ export default class FriendService implements IService {
         const users: User[] = [];
 
         for (const friend of friends) {
-            const id = friend.userId == userId ? friend.friendId : friend.userId;
+            const id =
+                friend.userId == userId ? friend.friendId : friend.userId;
 
-            const user = await useDb()
-                .getRepository(User)
-                .findOneBy({ id });
-            
+            const user = await useDb().getRepository(User).findOneBy({ id });
+
             if (user) {
                 users.push(user);
             }
         }
 
         return users;
-    }
+    };
 
     public add = async (createFriendDTO: CreateFriendDTO): Promise<Friend> => {
         const friend = new Friend();
 
         const userService = new UserService();
 
-        const friendUser = await userService.getByLogin(createFriendDTO.friendLogin);
+        const friendUser = await userService.getByLogin(
+            createFriendDTO.friendLogin
+        );
 
         if (!friendUser) {
             throw new Error("Friend doesn't exist");
@@ -116,7 +114,10 @@ export default class FriendService implements IService {
         }
 
         // Check if user is already friends
-        const isAlreadyFriends = await this.getFriend(createFriendDTO.userId, friendUser.id);
+        const isAlreadyFriends = await this.getFriend(
+            createFriendDTO.userId,
+            friendUser.id
+        );
 
         if (isAlreadyFriends) {
             throw new Error("You are already send an invitation");
@@ -136,8 +137,11 @@ export default class FriendService implements IService {
     };
 
     public async accept(acceptFriendDTO: AcceptFriendDTO): Promise<Friend> {
-        const friend = await this.getFriend(acceptFriendDTO.userId, acceptFriendDTO.friendId);
-        
+        const friend = await this.getFriend(
+            acceptFriendDTO.userId,
+            acceptFriendDTO.friendId
+        );
+
         if (!friend) {
             throw new Error("Friend doesn't exist");
         }
@@ -152,8 +156,11 @@ export default class FriendService implements IService {
     }
 
     public async reject(acceptFriendDTO: AcceptFriendDTO): Promise<Friend> {
-        const friend = await this.getFriend(acceptFriendDTO.userId, acceptFriendDTO.friendId);
-        
+        const friend = await this.getFriend(
+            acceptFriendDTO.userId,
+            acceptFriendDTO.friendId
+        );
+
         if (!friend) {
             throw new Error("Friend doesn't exist");
         }
@@ -167,8 +174,10 @@ export default class FriendService implements IService {
         return await useDb().getRepository(Friend).save(friend);
     }
 
-    public async getFriend(userId: number, friendId: number): Promise<Friend | null> {
-
+    public async getFriend(
+        userId: number,
+        friendId: number
+    ): Promise<Friend | null> {
         if (!userId || !friendId) {
             throw new Error("Invalid params");
         }
@@ -186,5 +195,15 @@ export default class FriendService implements IService {
             .getOne();
 
         return friend;
+    }
+
+    public async isFriend(userId: number, friendId: number): Promise<boolean> {
+        const friend = await this.getFriend(userId, friendId);
+
+        if (!friend) {
+            return false;
+        }
+
+        return friend.status == FriendStatus.ACCEPTED;
     }
 }
